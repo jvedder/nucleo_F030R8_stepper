@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
+#define LIMIT_SW_Pin GPIO_PIN_4
+#define LIMIT_SW_GPIO_Port GPIOF
 #define STEPPER_DIR_Pin GPIO_PIN_5
 #define STEPPER_DIR_GPIO_Port GPIOF
 #define LED_GRN_Pin GPIO_PIN_5

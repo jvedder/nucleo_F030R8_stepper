@@ -142,16 +142,21 @@ int main(void)
 
   while (1)
   {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
       uint32_t start_time_ms = HAL_GetTick();
       JV_ADC_Start();
 
       /* adc is 1 to 4096 */
       uint32_t adc = JV_ADC_GetResult();
-      printf("%lu\r\n", (adc + 1) * 2);
 
-      /* freq is approx 1 to 8K Hz */
-      uint64_t freq = (adc + 1) * 2;
+      /* print limit switch status */
+      printf(HAL_GPIO_ReadPin(LIMIT_SW_GPIO_Port, LIMIT_SW_Pin) ? "1 " : "- ");
 
+      /* freq is approx 1 to 1K Hz */
+      uint64_t freq = (adc/4) + 1;
+      printf("%lu\r\n", (adc/4) + 1);
 
       /* period is based on 48MHz sys clock */
       uint64_t period = 48000000ULL / freq;
@@ -168,8 +173,6 @@ int main(void)
           /* spin wait */
       }
   }
-  /* USER CODE BEGIN 3 */
-
   /* USER CODE END 3 */
 }
 
@@ -537,6 +540,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BTN_USER_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LIMIT_SW_Pin */
+  GPIO_InitStruct.Pin = LIMIT_SW_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(LIMIT_SW_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : STEPPER_DIR_Pin */
   GPIO_InitStruct.Pin = STEPPER_DIR_Pin;
