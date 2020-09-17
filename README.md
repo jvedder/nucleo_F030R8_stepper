@@ -3,16 +3,11 @@
 Tinkering with a **Big Easy Driver** stepper motor driver board using an 
  STM32 **Nucleo-F030R8** board. 
  
-Initially using a GPIO for stepping, but may
-later change to a timer.  Copied the TIM16 config code from another project
-for now.
+Initially using a GPIO for stepping, but may later change to a timer.  Copied the
+TIM16 config code from another project for now. Also may use a poteniometer wired
+to PA0 = ADC1_IN0. Copied the ADC1 code from another project for now. The TIM16
+and ADC1 drivers are hand-written (and include the CubeMX HAL code for reference).
  
-Also may use a poteniometer wired to PA0 = ADC1_IN0. Copied the ADC1 code from another project for now.
-
-The TIM16 and ADC1 drivers are hand-written (and include the CubeMX HAL code for reference).
- 
-The current frequency is output on the STLINK UART (38400,8N1) and udated every 100 ms.
-
 ## Requirements
 
  - "Nucleo-F030R9" Developement Board from [ST Microelectronics](https://www.st.com/)
@@ -37,7 +32,7 @@ The current frequency is output on the STLINK UART (38400,8N1) and udated every 
  - Connect wiper to CN7 Pin 28 (PA0 / A0)
  
 ### ST-LINK 
- - ST-LINK serial port is set to 38400, 8N1
+ - ST-LINK serial port is set to 8400 baud, 8 bits, no parity, 1 stop (38400, 8N1)
  
    
 ## Usage

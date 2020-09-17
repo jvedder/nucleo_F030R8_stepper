@@ -105,8 +105,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  JV_ADC_Init();
-  JV_TIM16_Init();
+  //JV_ADC_Init();
+  //JV_TIM16_Init();
+
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -114,32 +115,43 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+
+/**
+ * From the A4988 Datasheet:
+ *
+ *  MS1 MS2 MS3 Microstep      Excitation Mode
+ *  --- --- --- ---------      ---------------
+ *  L   L   L   Full Step      2 Phase
+ *  H   L   L   Half Step      1-2 Phase
+ *  L   H   L   Quarter Step   W1-2 Phase
+ *  H   H   L   Eighth Step    2W1-2 Phase
+ *  H   H   H   Sixteenth Step 4W1-2 Phase
+ */
+
+  /* Set mode to full step */
+  HAL_GPIO_WritePin(STEPPER_MODE1_GPIO_Port, STEPPER_MODE1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(STEPPER_MODE2_GPIO_Port, STEPPER_MODE2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(STEPPER_MODE3_GPIO_Port, STEPPER_MODE3_Pin, GPIO_PIN_RESET);
+
+  /* Enable the driver */
+  HAL_GPIO_WritePin(STEPPER_ENABLE_L_GPIO_Port, STEPPER_ENABLE_L_Pin, GPIO_PIN_RESET);
+
+  /* Forward direction */
+  HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, GPIO_PIN_RESET);
+
+
   while (1)
   {
-     uint32_t start_time_ms = HAL_GetTick();
-     JV_ADC_Start();
-     uint32_t adc = JV_ADC_GetResult();
-     printf("FRQ: %lu\r\n", (adc + 1) * 8);
+      /* approx 2 ms per step * 200 steps/rev = 0.4 sec/rev */
+      /* 1/0.4 = 2.5 rev/sec = 150 RPM  */
+      HAL_GPIO_WritePin(STEPPER_STEP_GPIO_Port, STEPPER_STEP_Pin, GPIO_PIN_SET);
+      Delay_ms(1);
 
-     uint64_t freq = (adc + 1) * 8; // approx 1 to 32K
-     uint64_t period = 48000000ULL / freq;
-     uint32_t prescale = period >> 16;
-     period = period / (uint64_t) (prescale + 1);
-
-     TIM16->PSC = prescale;
-     TIM16->ARR = period-1;
-     TIM16->CCR1 = period/2;
-
-     // wait remainder of 100ms
-     while ( (HAL_GetTick() - start_time_ms) < 100)
-     {
-         // spin wait
-     }
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+      HAL_GPIO_WritePin(STEPPER_STEP_GPIO_Port, STEPPER_STEP_Pin, GPIO_PIN_RESET);
+      Delay_ms(1);
   }
+  /* USER CODE BEGIN 3 */
+
   /* USER CODE END 3 */
 }
 
