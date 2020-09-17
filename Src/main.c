@@ -105,8 +105,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  //JV_ADC_Init();
-  //JV_TIM16_Init();
+  JV_ADC_Init();
+  JV_TIM16_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -142,13 +142,31 @@ int main(void)
 
   while (1)
   {
-      /* approx 2 ms per step * 200 steps/rev = 0.4 sec/rev */
-      /* 1/0.4 = 2.5 rev/sec = 150 RPM  */
-      HAL_GPIO_WritePin(STEPPER_STEP_GPIO_Port, STEPPER_STEP_Pin, GPIO_PIN_SET);
-      Delay_ms(1);
+      uint32_t start_time_ms = HAL_GetTick();
+      JV_ADC_Start();
 
-      HAL_GPIO_WritePin(STEPPER_STEP_GPIO_Port, STEPPER_STEP_Pin, GPIO_PIN_RESET);
-      Delay_ms(1);
+      /* adc is 1 to 4096 */
+      uint32_t adc = JV_ADC_GetResult();
+      printf("%lu\r\n", (adc + 1) * 2);
+
+      /* freq is approx 1 to 8K Hz */
+      uint64_t freq = (adc + 1) * 2;
+
+
+      /* period is based on 48MHz sys clock */
+      uint64_t period = 48000000ULL / freq;
+      uint32_t prescale = period >> 16;
+      period = period / (uint64_t) (prescale + 1);
+
+      TIM16->PSC = prescale;
+      TIM16->ARR = period-1;
+      TIM16->CCR1 = period/2;
+
+      /* wait remainder of 100ms before updating again */
+      while ( (HAL_GetTick() - start_time_ms) < 100)
+      {
+          /* spin wait */
+      }
   }
   /* USER CODE BEGIN 3 */
 
